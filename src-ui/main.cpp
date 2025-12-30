@@ -133,6 +133,9 @@ int main(int argc, char *argv[])
     (void)io;
     io.IniFilename = NULL;
 
+    // --- ADD FLOATING WINDOWS ---
+io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable; // Enable windows to float outside main window
+
     logger->debug("Starting with OpenGL %s", (char *)glGetString(GL_VERSION));
     logger->debug("Max texture size: %zu", maxTextureSize);
 
@@ -222,8 +225,16 @@ int main(int argc, char *argv[])
     do
     {
         satdump::renderMainUI();
-    } while (!glfwWindowShouldClose(window) && !signal_caught);
-
+    // --- FLOATING BLOCK ---
+    ImGuiIO& io = ImGui::GetIO();
+    if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+    {
+        GLFWwindow* backup_current_context = glfwGetCurrentContext();
+        ImGui::UpdatePlatformWindows();
+        ImGui::RenderPlatformWindowsDefault();
+        glfwMakeContextCurrent(backup_current_context);
+    }
+} while (!glfwWindowShouldClose(window) && !signal_caught);
     // Save window position
     if (satdump::config::main_cfg["user_interface"]["remember_pos"]["value"].get<bool>())
     {
@@ -244,14 +255,16 @@ int main(int argc, char *argv[])
     satdump::exitMainUI();
 
     // Cleanup
+// Cleanup
 #ifndef IMGUI_IMPL_OPENGL_ES2
     if (fallback_gl)
         ImGui_ImplOpenGL2_Shutdown();
     else
 #endif
         ImGui_ImplOpenGL3_Shutdown();
-    ImGui_ImplGlfw_Shutdown();
-    ImGui::DestroyContext();
+
+ImGui_ImplGlfw_Shutdown();
+ImGui::DestroyContext(); // This will now safely clean up the viewport data
 
     glfwDestroyWindow(window);
     glfwTerminate();
