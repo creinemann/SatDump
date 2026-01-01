@@ -12,11 +12,9 @@ permissions:
 
 jobs:
   build_windows_x64:
-    runs-on: self-hosted
-
+    runs-on: windows-latest  # Changed from self-hosted
     steps:
       - uses: actions/checkout@v4
-
       - name: Cache dependencies
         uses: actions/cache@v4
         id: win-deps-x64
