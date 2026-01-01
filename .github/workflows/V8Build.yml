@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   build_windows_x64:
-    runs-on: self-hosted
+    runs-on: windows-2022
 
     steps:
       - name: Checkout Repository
