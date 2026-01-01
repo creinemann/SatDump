@@ -1,4 +1,4 @@
-name: Build All USRG
+name: Build All USRG V2
 
 on: [push]
 
